@@ -1,0 +1,65 @@
+:root{
+
+  --primary:#0F766E;
+  --primary-light:#14B8A6;
+  --accent:#10B981;
+
+  --background:#F8FAFC;
+  --surface:#FFFFFF;
+
+  --text:#0F172A;
+  --text-light:#475569;
+
+  --border:#E2E8F0;
+
+  --shadow: rgba(15, 23, 42, 0.08);
+
+   --hover:#eaf7ee;
+  --secondary:#F0FDF4;
+  --secondary-hover: #d8f6e2;
+
+  --success:#10B981;
+  --danger:#EF4444;
+
+  --success-bg: rgba(16,185,129,0.12);
+  --success-border: rgba(16,185,129,0.25);
+}
+
+.dark{
+
+  --background:#020617;
+  --surface:#0F172A;
+
+  --text:#F8FAFC;
+  --text-light:#CBD5E1;
+
+  --primary:#2DD4BF;
+  --primary-light:#5EEAD4;
+  --accent:#34D399;
+
+  --border:#1E293B;
+
+  --shadow: rgba(0, 0, 0, 0.35);
+  
+  --hover:#3a4e6e;
+  --secondary:#1E293B;
+  --secondary-hover: #435672;
+
+  --success:#34D399;
+  --danger:#F87171;
+
+  --success-bg: rgba(52,211,153,0.18);
+  --success-border: rgba(52,211,153,0.35);
+}
+
+.input-theme {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: all .3s ease;
+}
+
+.input-theme:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(20,184,166,.15);
+}
