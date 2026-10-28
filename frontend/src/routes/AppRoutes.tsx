@@ -25,6 +25,7 @@ function AppRoutes() {
         <Route path="/resume-analysis" element={<Upload />} />
         <Route path="/resume-analysis/upload" element={<ResumeUpload />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
+        <Route path="/results/:analysisId" element={<Results />} />
         <Route path="/results" element={<Results />} />
         <Route path="/interview" element={<Interview />} />
         <Route path="/history" element={<History />} />

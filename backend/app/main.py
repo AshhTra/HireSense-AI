@@ -6,6 +6,7 @@ from app.models.user import User
 from app.api.routes.auth import router as auth_router
 
 from app.routes.resume import router as resume_router
+from app.models.resume_analysis import ResumeAnalysis
 
 Base.metadata.create_all(bind=engine)
 

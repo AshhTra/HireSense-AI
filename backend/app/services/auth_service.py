@@ -1,10 +1,13 @@
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.utils.security import hash_password
-
-from app.utils.security import verify_password
+from app.utils.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+)
 
 
 def create_user(
@@ -31,11 +34,17 @@ def create_user(
         password=hash_password(password),
     )
 
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
+    try:
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to register user.",
+        )
 
 
 def login_user(
@@ -49,19 +58,15 @@ def login_user(
         .first()
     )
 
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found.",
-        )
-
-    if not verify_password(
+    if not user or not verify_password(
         password,
         user.password,
     ):
         raise HTTPException(
             status_code=401,
-            detail="Invalid password.",
+            detail="Invalid email or password.",
         )
 
-    return user
+    access_token = create_access_token(user.id)
+
+    return user, access_token

@@ -1,3 +1,4 @@
+
 import API from "./api";
 
 export async function registerUser(data: {
@@ -7,9 +8,7 @@ export async function registerUser(data: {
 }) {
   const response = await fetch(`${API}/auth/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -22,12 +21,19 @@ export async function loginUser(data: {
 }) {
   const response = await fetch(`${API}/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
-  return response.json();
-}
+  const result = await response.json();
 
+  if (response.ok) {
+    const token = result.access_token ?? result.token;
+
+    if (token) {
+      localStorage.setItem("token", token);
+    }
+  }
+
+  return result;
+}
