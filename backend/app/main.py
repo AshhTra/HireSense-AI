@@ -1,14 +1,20 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
-from app.models.user import User
+
+# Import all models before creating database tables
+from app.models import User, ResumeAnalysis, Interview
+
 from app.api.routes.auth import router as auth_router
-
 from app.routes.resume import router as resume_router
-from app.models.resume_analysis import ResumeAnalysis
+from app.routes.interview import router as interview_router
 
+
+# Create database tables
 Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="HireSense AI API",
@@ -29,8 +35,9 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-
 app.include_router(resume_router)
+app.include_router(interview_router)
+
 
 @app.get("/")
 def home():

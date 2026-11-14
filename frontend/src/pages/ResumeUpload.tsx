@@ -82,6 +82,15 @@ function ResumeUpload() {
 
       <Container>
         <div className="py-10">
+          <button
+            type="button"
+            onClick={() => navigate("/resume-analysis")}
+            className="mb-6 text-sm font-medium"
+            style={{ color: "var(--primary)" }}
+          >
+            ← Back to Resume Analysis Options
+          </button> 
+
           <h1
             className="text-3xl font-bold md:text-4xl"
             style={{ color: "var(--text)" }}
