@@ -126,3 +126,79 @@ export async function evaluateInterview(
   return response.json();
 }
 
+export interface InterviewHistoryItem {
+  id: number;
+  resume_filename: string;
+  interview_mode: string;
+  job_role: string | null;
+  overall_score: number;
+  summary: string;
+  created_at: string;
+}
+
+export interface InterviewDetails extends InterviewHistoryItem {
+  job_description: string | null;
+  questions_answers: {
+    question: string;
+    category: string;
+    answer: string;
+  }[];
+  strengths: string[];
+  improvements: string[];
+  question_feedback: {
+    question: string;
+    answer: string;
+    score: number;
+    feedback: string;
+    ideal_answer: string;
+  }[];
+}
+
+// Get all completed interviews
+export async function getInterviewHistory(): Promise<InterviewHistoryItem[]> {
+  const response = await fetch(`${API}/interview/history`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to load interview history.");
+  }
+
+  return response.json();
+}
+
+// Get details of a particular interview
+export async function getInterviewDetails(
+  interviewId: number
+): Promise<InterviewDetails> {
+  const response = await fetch(
+    `${API}/interview/history/${interviewId}`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to load interview details.");
+  }
+
+  return response.json();
+}
+
+// View or download the associated resume PDF
+export async function getInterviewResume(
+  interviewId: number
+): Promise<Blob> {
+  const response = await fetch(
+    `${API}/interview/history/${interviewId}/resume`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to load resume PDF.");
+  }
+
+  return response.blob();
+}

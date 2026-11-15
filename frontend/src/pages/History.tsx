@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FileText, Bot, Clock, LoaderCircle, ArrowRight } from "lucide-react";
 
 import Navbar from "../components/layout/Navbar/Navbar";
@@ -8,16 +8,29 @@ import Container from "../components/common/Container/Container";
 import Card from "../components/common/Card/Card";
 import { getResumeHistory } from "../services/resumeService";
 import type { ResumeHistoryItem } from "../services/resumeService";
+import {
+  getInterviewHistory,
+  type InterviewHistoryItem,
+} from "../services/interviewService";
 
 type HistoryTab = "resume" | "interview";
 
 function History() {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<HistoryTab>("resume");
+  // const [activeTab, setActiveTab] = useState<HistoryTab>("resume");
+  const [searchParams] = useSearchParams();
+
+  const [activeTab, setActiveTab] = useState<HistoryTab>(
+    searchParams.get("tab") === "interview" ? "interview" : "resume"
+  );
   const [resumes, setResumes] = useState<ResumeHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [interviews, setInterviews] = useState<InterviewHistoryItem[]>([]);
+  const [interviewLoading, setInterviewLoading] = useState(true);
+  const [interviewError, setInterviewError] = useState("");
 
   useEffect(() => {
     async function loadHistory() {
@@ -36,6 +49,25 @@ function History() {
     }
 
     loadHistory();
+  }, []);
+
+  useEffect(() => {
+    async function loadInterviewHistory() {
+      try {
+        const data = await getInterviewHistory();
+        setInterviews(data);
+      } catch (err) {
+        setInterviewError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load interview history."
+        );
+      } finally {
+        setInterviewLoading(false);
+      }
+    }
+
+    loadInterviewHistory();
   }, []);
 
   return (
@@ -202,7 +234,7 @@ function History() {
             </Card>
           )}
 
-          {activeTab === "interview" && (
+          {/* {activeTab === "interview" && (
             <Card className="p-6">
               <div className="py-12 text-center">
                 <Bot
@@ -224,6 +256,131 @@ function History() {
                   the Interview Assistant is implemented.
                 </p>
               </div>
+            </Card>
+          )} */}
+
+          {activeTab === "interview" && (
+            <Card className="p-6">
+              <h2
+                className="mb-6 text-xl font-semibold"
+                style={{ color: "var(--text)" }}
+              >
+                Interview Session History
+              </h2>
+
+              {interviewLoading ? (
+                <div
+                  className="flex items-center justify-center gap-2 py-12"
+                  style={{ color: "var(--text-light)" }}
+                >
+                  <LoaderCircle size={20} className="animate-spin" />
+                  Loading interview history...
+                </div>
+              ) : interviewError ? (
+                <p className="py-8 text-center text-red-500">{interviewError}</p>
+              ) : interviews.length === 0 ? (
+                <div className="py-12 text-center">
+                  <Bot
+                    size={44}
+                    className="mx-auto mb-4"
+                    style={{ color: "var(--primary)" }}
+                  />
+                  <h2
+                    className="text-xl font-semibold"
+                    style={{ color: "var(--text)" }}
+                  >
+                    No interview history yet
+                  </h2>
+                  <p
+                    className="mx-auto mt-2 max-w-md"
+                    style={{ color: "var(--text-light)" }}
+                  >
+                    Your completed AI interview sessions will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {interviews.map((interview) => (
+                    <button
+                      key={interview.id}
+                      type="button"
+                      onClick={() =>
+                        navigate(`/interview/history/${interview.id}`)
+                      }
+                      className="flex w-full flex-col justify-between gap-4 rounded-xl border p-4 text-left transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-teal-600 sm:flex-row sm:items-center"
+                      style={{
+                        backgroundColor: "var(--surface)",
+                        borderColor: "var(--border)",
+                      }}
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className="rounded-xl p-3"
+                          style={{
+                            backgroundColor: "var(--secondary)",
+                            color: "var(--primary)",
+                          }}
+                        >
+                          <Bot size={22} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <h3
+                            className="break-words font-semibold"
+                            style={{ color: "var(--text)" }}
+                          >
+                            {interview.resume_filename}
+                          </h3>
+
+                          <p
+                            className="mt-1 text-sm"
+                            style={{ color: "var(--text-light)" }}
+                          >
+                            {interview.interview_mode
+                              .replace(/-/g, " ")
+                              .replace(/\b\w/g, (char) => char.toUpperCase())}
+                            {" · "}
+                            {interview.job_role || "No specific job role"}
+                          </p>
+
+                          <p
+                            className="mt-1 flex items-center gap-1 text-sm"
+                            style={{ color: "var(--text-light)" }}
+                          >
+                            <Clock size={14} />
+                            {new Date(interview.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 sm:justify-end">
+                        <span
+                          className="text-sm"
+                          style={{ color: "var(--text-light)" }}
+                        >
+                          Overall Score
+                        </span>
+
+                        <span
+                          className="rounded-full border px-4 py-1 text-sm font-semibold"
+                          style={{
+                            backgroundColor: "var(--success-bg)",
+                            borderColor: "var(--success-border)",
+                            color: "var(--accent)",
+                          }}
+                        >
+                          {interview.overall_score}%
+                        </span>
+
+                        <ArrowRight
+                          size={18}
+                          style={{ color: "var(--primary)" }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
           )}
         </div>

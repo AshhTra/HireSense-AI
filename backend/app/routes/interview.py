@@ -1,5 +1,10 @@
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+# from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter, Depends, File, Form,
+    HTTPException, UploadFile, Query
+)
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
@@ -261,3 +266,111 @@ async def evaluate_interview(
         "interview_id": interview_id,
         "message": "Interview evaluated and saved successfully.",
     }
+
+
+# ---------------- INTERVIEW HISTORY ----------------
+
+@router.get("/history")
+async def get_interview_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    interviews = (
+        db.query(Interview)
+        .filter(Interview.user_id == current_user.id)
+        .order_by(Interview.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": interview.id,
+            "resume_filename": interview.resume_filename,
+            "interview_mode": interview.interview_mode,
+            "job_role": interview.job_role,
+            "overall_score": interview.overall_score,
+            "summary": interview.summary,
+            "created_at": interview.created_at,
+        }
+        for interview in interviews
+    ]
+
+
+# ---------------- INTERVIEW DETAILS ----------------
+
+@router.get("/history/{interview_id}")
+async def get_interview_details(
+    interview_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    interview = (
+        db.query(Interview)
+        .filter(
+            Interview.id == interview_id,
+            Interview.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not interview:
+        raise HTTPException(
+            status_code=404,
+            detail="Interview not found.",
+        )
+
+    return {
+        "id": interview.id,
+        "resume_filename": interview.resume_filename,
+        "interview_mode": interview.interview_mode,
+        "job_role": interview.job_role,
+        "job_description": interview.job_description,
+        "questions_answers": interview.questions_answers,
+        "overall_score": interview.overall_score,
+        "summary": interview.summary,
+        "strengths": interview.strengths,
+        "improvements": interview.improvements,
+        "question_feedback": interview.question_feedback,
+        "created_at": interview.created_at,
+    }
+
+
+# ---------------- VIEW INTERVIEW RESUME ----------------
+
+@router.get("/history/{interview_id}/resume")
+async def get_interview_resume(
+    interview_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    interview = (
+        db.query(Interview)
+        .filter(
+            Interview.id == interview_id,
+            Interview.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if not interview:
+        raise HTTPException(
+            status_code=404,
+            detail="Interview not found.",
+        )
+
+    if not interview.resume_file:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume PDF not found.",
+        )
+
+    return Response(
+        content=interview.resume_file,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (
+                f'inline; filename="{interview.resume_filename}"'
+            )
+        },
+    )
+

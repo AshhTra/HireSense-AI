@@ -12,8 +12,9 @@ import Interview from "../pages/Interview";
 import History from "../pages/History";
 import Profile from "../pages/Profile";
 import Chat from "../pages/Chat";
-import NotFound from "../pages/NotFound";
+// import NotFound from "../pages/NotFound";
 import InterviewSetup from "../pages/InterviewSetup";
+import InterviewDetails from "../pages/InterviewDetails";
 
 function AppRoutes() {
   return (
@@ -32,9 +33,13 @@ function AppRoutes() {
         <Route path="/history" element={<History />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="*" element={<NotFound />} />
+        {/* <Route path="*" element={<NotFound />} /> */}
         <Route path="/interview" element={<Interview />} />
         <Route path="/interview/:mode" element={<InterviewSetup />} />
+        <Route
+          path="/interview/history/:interviewId"
+          element={<InterviewDetails />}
+        />
       </Routes>
     </BrowserRouter>
   );
